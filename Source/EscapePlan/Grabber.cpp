@@ -23,8 +23,31 @@ void UGrabber::BeginPlay()
 	Super::BeginPlay();
 	UE_LOG(LogTemp, Warning, TEXT("Grabber reporting for duty!"))
 
-	// ...
-	
+	///Look for attached physics handle
+	PhysicsHandlePtr = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandlePtr) 
+	{
+	}
+	else 
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s missing PhysicsHandle"), *GetOwner()->GetName())
+	}
+
+	InputComponentPtr = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (InputComponentPtr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found Input Component"))
+		InputComponentPtr->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s missing Input Component"), *GetOwner()->GetName())
+	}
+
+}
+
+void UGrabber::Grab() {
+	UE_LOG(LogTemp, Warning, TEXT("Grabbing Component"))
 }
 
 
