@@ -31,5 +31,10 @@ private:
 	UPhysicsHandleComponent* PhysicsHandlePtr = nullptr;
 	UInputComponent* InputComponentPtr = nullptr;
 	void Grab();
-	
+	void Release();
+	void FindPhysicsHandleComponent();
+	void SetupInputCommonent();
+	const FHitResult GetFirstPhysicsBodyInReach();
+	FVector GetReachLineStart();
+	FVector GetReachLineEnd();
 };
