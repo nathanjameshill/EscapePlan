@@ -2,6 +2,8 @@
 
 #include "Grabber.h"
 #include "Engine/World.h"
+#include "Components/ActorComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "DrawDebugHelpers.h"
 
 #define OUT
@@ -24,26 +26,27 @@ void UGrabber::BeginPlay()
 }
 
 void UGrabber::Grab() {
-	UE_LOG(LogTemp, Warning, TEXT("Grabbing Component"))
 	///try find actor with physics body set
+	if (!PhysicsHandlePtr) { return; }
+
 	FHitResult HitResult = GetFirstPhysicsBodyInReach();
 	auto ComponentToGrapPtr = HitResult.GetComponent();
 	auto ActorHitPtr = HitResult.GetActor();
 
-	if (ActorHitPtr != nullptr) {
-		PhysicsHandlePtr->GrabComponent(
-			ComponentToGrapPtr,
-			NAME_None,
-			ComponentToGrapPtr->GetOwner()->GetActorLocation(),
-			true
-		);
-	}
+	if (!ActorHitPtr && !ComponentToGrapPtr) { return; }
+
+	PhysicsHandlePtr->GrabComponent(
+		ComponentToGrapPtr,
+		NAME_None,
+		ComponentToGrapPtr->GetOwner()->GetActorLocation(),
+		true
+	);
 }
 
 void UGrabber::Release() {
-	UE_LOG(LogTemp, Warning, TEXT("Release Component"))
-		///Release physics handle
-		PhysicsHandlePtr->ReleaseComponent();
+	///Release physics handle
+	if (!PhysicsHandlePtr) { return; }
+	PhysicsHandlePtr->ReleaseComponent();
 
 }
 
@@ -81,6 +84,9 @@ void UGrabber::FindPhysicsHandleComponent()
 {
 	///Look for attached physics handle
 	PhysicsHandlePtr = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandlePtr == nullptr) {
+		UE_LOG(LogTemp, Error, TEXT("%s missing physics handler"), *GetOwner()->GetName());
+	}
 }
 
 
@@ -89,6 +95,7 @@ void UGrabber::FindPhysicsHandleComponent()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (!PhysicsHandlePtr) { return; }
 	if (PhysicsHandlePtr->GrabbedComponent) {
 		auto LineTraceEnd = GetReachLineEnd();
 		PhysicsHandlePtr->SetTargetLocation(LineTraceEnd);
